@@ -1,9 +1,9 @@
-# NGINX_VERSION ?= 1.21.2
-# NCHAN_VERSION ?= 1.2.10
-NGINX_VERSION ?= 1.14.2
+NGINX_VERSION ?= 1.21.2
 NCHAN_VERSION ?= 1.2.10
+# NGINX_VERSION ?= 1.14.2
+# NCHAN_VERSION ?= 1.2.10
 
-build: build-heroku-18 build-heroku-20
+build: build-heroku-18 build-heroku-20 release
 
 build-heroku-18:
 	@echo "Building Nchan in Docker for heroku-18 ..."
@@ -25,3 +25,7 @@ shell-heroku-18:
 shell-heroku-20:
 	@echo "Start a Docker shell for heroku-20 ..."
 	@docker run -v $(shell pwd):/buildpack --rm -it -e "STACK=heroku-20" -w /buildpack heroku/heroku:20-build bash
+
+release:
+	git commit -a -m "Rebuilding stacks"
+	git push origin master
