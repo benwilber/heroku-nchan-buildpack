@@ -16,8 +16,6 @@ fold -w 100 -s < "$BUILD_DIR/nginx/nginx-V.txt" | pr -to 7
 # Add a profile.d script to add nginx to PATH
 mkdir -p "$BUILD_DIR/.profile.d"
 cat << "EOF" > "$BUILD_DIR/.profile.d/000-nginx-path.sh"
-export PATH="$BUILD_DIR/nginx/sbin:$PATH"
+export PATH="$HOME/nginx/sbin:$PATH"
 EOF
 chmod +x "$BUILD_DIR/.profile.d/000-nginx-path.sh"
-
-ln -s "$BUILD_DIR/nginx" "$HOME/nginx"
