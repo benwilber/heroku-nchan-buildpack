@@ -1,7 +1,7 @@
 # NGINX_VERSION ?= 1.21.2
 # NCHAN_VERSION ?= 1.2.10
-NGINX_VERSION ?= 1.19.2
-NCHAN_VERSION ?= 1.2.7
+NGINX_VERSION ?= 1.19.8
+NCHAN_VERSION ?= 1.2.10
 
 build: build-heroku-18 build-heroku-20
 
