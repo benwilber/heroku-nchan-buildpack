@@ -19,3 +19,5 @@ cat << "EOF" > "$BUILD_DIR/.profile.d/000-nginx-path.sh"
 export PATH="$BUILD_DIR/nginx/sbin:$PATH"
 EOF
 chmod +x "$BUILD_DIR/.profile.d/000-nginx-path.sh"
+
+ln -s "$BUILD_DIR/nginx" "$HOME/nginx"
