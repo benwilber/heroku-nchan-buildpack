@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+NGINX_DIR="$HOME/nginx"
+NGINX_BIN="$NGINX_DIR/sbin/nginx"
+NGINX_CONF_DIR="$NGINX_DIR/conf"
+SOURCE_NGINX_CONF="$NGINX_CONF_DIR/nginx.conf.default"
+DEST_NGINX_CONF="$NGINX_CONF_DIR/nginx.conf"
+
+# If there's an nginx.conf in the root of the project directory
+# then it will be used instead of the nginx.conf.default
+if [[ -f "$HOME/nginx.conf" ]]; then
+  SOURCE_NGINX_CONF="$HOME/nginx.conf"
+fi
+
+# This command also can override the nginx.conf
+# via the Procfile like:
+#
+# web: startnchan -c path/to/nginx.conf
+#
+while getopts "c:" opt; do
+  case "$opt" in
+    c) SOURCE_NGINX_CONF="$OPTARG";;
+  esac
+done
+
+TEST_NGINX_CONF="$(mktemp --tmpdir="$NGINX_CONF_DIR" --suffix=-nginx.conf.test)"
+
+cat <<- EOF | python - "$SOURCE_NGINX_CONF" > "$TEST_NGINX_CONF"
+import sys
+from os import environ
+from jinja2 import Template
+
+with open(sys.argv[1]) as f:
+  content = f.read()
+
+  try:
+    template = Template(content)
+    rendered = template.render(env=environ, **environ)
+    sys.stdout.write(rendered)
+  except:
+    for i, line in enumerate(content.splitlines(), start=1):
+      sys.stderr.write("{0:>4}: {1}\n".format(i, line))
+
+    raise
+EOF
+
+"$NGINX_BIN" -c "$TEST_NGINX_CONF" -t || {
+  cat "$TEST_NGINX_CONF" >&2
+  exit 1
+}
+
+mv "$TEST_NGINX_CONF" "$DEST_NGINX_CONF"
+exec "$NGINX_BIN" -c "$DEST_NGINX_CONF"

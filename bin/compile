@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# bin/compile BUILD_DIR CACHE_DIR ENV_DIR
+set -euo pipefail
+OLD_PATH="$PATH"
+
+BUILD_DIR="$1"
+CACHE_DIR="$2"
+ENV_DIR="$3"
+
+echo "-----> Installing Nchan ..."
+tar -zxf "dist/nchan-$STACK.tar.gz" -C "$BUILD_DIR"
+cp -a conf/nginx.conf.default "$BUILD_DIR/nginx/conf/nginx.conf.default"
+cp -a bin/startnchan "$BUILD_DIR/nginx/sbin"
+fold -w 100 -s < "$BUILD_DIR/nginx/nginx-V.txt" | pr -to 7
+
+# Add a profile.d script to add nginx to PATH
+mkdir -p "$BUILD_DIR/.profile.d"
+cat << "EOF" > "$BUILD_DIR/.profile.d/000-nginx-path.sh"
+export PATH="$BUILD_DIR/nginx/sbin:$PATH"
+EOF
+chmod +x "$BUILD_DIR/.profile.d/000-nginx-path.sh"

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Build Nchan and modules for Heroku.
+# This script is designed to run in a Heroku Stack Docker
+# image. More information on the Heroku Stack can be found
+# at https://devcenter.heroku.com/articles/stack
+set -euo pipefail
+
+NGINX_SOURCE_URL="http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"
+NCHAN_SOURCE_URL="https://github.com/slact/nchan/archive/refs/tags/v${NCHAN_VERSION}.tar.gz"
+
+TEMP_DIR="$(mktemp -d /tmp/nginx-${NGINX_VERSION}.XXXXXXXXXX)"
+INSTALL_DIR="/app/nginx"
+mkdir -p "$INSTALL_DIR"
+
+curl -sSfL "$NGINX_SOURCE_URL" | tar zx -C "$TEMP_DIR"
+curl -sSfL "$NCHAN_SOURCE_URL" | tar zx -C "$TEMP_DIR"
+
+cd "$TEMP_DIR/nginx-${NGINX_VERSION}"
+./configure \
+  --with-pcre-jit \
+  --with-http_realip_module \
+  --with-http_ssl_module \
+  --add-module="$TEMP_DIR/nchan-${NCHAN_VERSION}" \
+  --prefix="$INSTALL_DIR"
+make install
+
+export PATH="$INSTALL_DIR/sbin:$PATH"
+
+nginx -V
+nginx -V >&  "$INSTALL_DIR/nginx-V.txt"
+tar -zcf "$1" -C "$(dirname "$INSTALL_DIR")" .
