@@ -3,7 +3,7 @@ NCHAN_VERSION ?= 1.2.10
 # NGINX_VERSION ?= 1.14.2
 # NCHAN_VERSION ?= 1.2.10
 
-build: build-heroku-18 build-heroku-20 release
+build: build-heroku-18 build-heroku-20
 
 build-heroku-18:
 	@echo "Building Nchan in Docker for heroku-18 ..."
